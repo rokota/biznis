@@ -55,6 +55,9 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
 
 	public int zivljenja = 3;
         
+        public int score = 0;
+        public int combo = 0;
+        
         public Kocka[] kocke = new Kocka[63];
         public int stKock = kocke.length;
         
@@ -185,13 +188,17 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
                                             reset = true;
                                             stevec1 = 0;
                                             zivljenja--;
+                                            combo = 0;
+                                            igra = false;
                                             if (zivljenja == 0) {
                                                     ura = 0;
                                                     konec = true;
                                             }
-                                            igra = false;
                                     }
-                                    else vY *= -1;
+                                    else {
+                                        combo = 0;
+                                        vY *= -1;
+                                    }
                             }
 
                             if (tempXlevo < 0 || tempXdesno > 884) {
@@ -210,21 +217,29 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
                         
                         if(kocke[i].vrniVidna()) {
                             if (kocke[i].getRect().contains(levo)) {
+                                combo++;
+                                score += 1000 + combo*100;
                                 vX *= -1;
                                 stKock--;
                                 kocke[i].unicena(kocke[i].vrniVidna());                                
                             }
                             else if (kocke[i].getRect().contains(desno)) {
+                                combo++;
+                                score += 1000 + combo*100;
                                 vX *= -1;
                                 stKock--;
                                 kocke[i].unicena(kocke[i].vrniVidna());                                
                             }
                             else if (kocke[i].getRect().contains(gor)) {
+                                combo++;
+                                score += 1000 + combo*100;
                                 vY *= -1;
                                 stKock--;
                                 kocke[i].unicena(kocke[i].vrniVidna());                                
                             }
                             else if (kocke[i].getRect().contains(dol)) {
+                                combo++;
+                                score += 1000 + combo*100;
                                 vY *= -1;
                                 stKock--;
                                 kocke[i].unicena(kocke[i].vrniVidna());                                
@@ -235,6 +250,7 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
                                 konec = false;
                                 igra = false;
                                 start = false;
+                                combo = 0;
                             }
                         }
                     }
@@ -289,6 +305,7 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
 				g.fillRect(ploscaX, ploscaY, ploscaSirina, ploscaVisina);
 				g.setColor(Color.BLACK);
 				g.fillOval(zogaX, zogaY, zogaR, zogaR);
+                                g.drawString(String.valueOf(score), 110, 35);
 				g.setColor(Color.RED);
 				if (zivljenja == 3) {
 					g.fillOval(15, 15, 20, 20);
@@ -315,10 +332,10 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
 		else {
                     g.setColor(Color.BLACK);
                     if (konec) {
-                        g.drawString(String.valueOf("Konec igre!"), 290, 310);
+                        g.drawString(String.valueOf("Konec igre! Rezultat: "+score), 200, 310);
                     }
                     else if (zmaga) {
-                        g.drawString(String.valueOf("Congradumalations!"), 290, 310);
+                        g.drawString(String.valueOf("Congradumalations! Rezultat: "+score), 150, 310);
                     }
                 }
 	}
