@@ -32,13 +32,16 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
 	public boolean konec = false;
 	public boolean levo = false;
 	public boolean desno = false;
+        public boolean reset = false;
+        public boolean zmaga = false;
 
 	public int ploscaX = 0;
 	public int ploscaY = 0;
 	public int ploscaSirina = 160;
 	public int ploscaVisina = 20;
 
-	public int ploscaHitrost = 6;
+	public int ploscaHitrost = 10;
+        
 
 	public int zogaX = 0;
 	public int zogaY = 0;
@@ -53,6 +56,7 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
 	public int zivljenja = 3;
         
         public Kocka[] kocke = new Kocka[63];
+        public int stKock = kocke.length;
         
         public static class Kocka {
             
@@ -126,6 +130,7 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
 		if (ura == 0) {
                     nastaviPlosco();
                     nastaviKocke();
+                    stKock = kocke.length;
                 }
 		ura++;
 		if (start) {
@@ -136,20 +141,31 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
                     int tempXdesno = zogaX + zogaR + vX;
                     int tempYgor = zogaY + vY;
                     int tempYdol = zogaY + zogaR + vY;
+                    
+
 
 
                     if (!igra) {
-                            if (levo && stevec1 == 0) {
+                            if (reset) {
+                                if (ploscaX + ploscaSirina/2 < 442) ploscaX += ploscaHitrost;
+                                else if (ploscaX + ploscaSirina/2 > 442) ploscaX -= ploscaHitrost;
+                                else reset = false;
+                                zogaX = ploscaX + ploscaSirina/2 - zogaR/2;
+                                zogaY = 661 - ploscaVisina - 20;
+                            }
+                            else {
+                                if (levo && stevec1 == 0) {
                                     if (ploscaXlevo >= 0) {
                                             ploscaX -= ploscaHitrost;
                                             zogaX = ploscaX + ploscaSirina/2 - zogaR/2;
                                     }
-                            }
-                            if (desno && stevec1 == 0) {
-                                    if (ploscaXdesno <= 884) {
-                                            ploscaX += ploscaHitrost;
-                                            zogaX = ploscaX + ploscaSirina/2 - zogaR/2;
-                                    }
+                                }
+                                if (desno && stevec1 == 0) {
+                                        if (ploscaXdesno <= 884) {
+                                                ploscaX += ploscaHitrost;
+                                                zogaX = ploscaX + ploscaSirina/2 - zogaR/2;
+                                        }
+                                }
                             }
                     }
                     else {
@@ -166,9 +182,7 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
 
                             if (tempYdol > ploscaY) {
                                     if (tempXdesno < ploscaXlevo || tempXlevo > ploscaXdesno) {
-                                            nastaviPlosco1();
-                                            zogaX = ploscaX + ploscaSirina/2 - zogaR/2;
-                                            zogaY = (661 - ploscaVisina) - 30;
+                                            reset = true;
                                             stevec1 = 0;
                                             zivljenja--;
                                             if (zivljenja == 0) {
@@ -189,17 +203,39 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
                 
                 for (int i = 0; i < 63; i++) {
                     if (kocke[i].getRect().intersects(zoga.getRect())) {
-                        Point levo = new Point(zogaX - 1, zogaY+zogaR/2);
-                        Point gor = new Point(zogaX+zogaR/2, zogaY - 1);
-                        Point desno = new Point(zogaX+zogaR + 1, zogaY+zogaR/2);
-                        Point dol = new Point(zogaX+zogaR/2, zogaY+zogaR + 1);
+                        Point levo = new Point(zogaX, zogaY+zogaR/2);
+                        Point gor = new Point(zogaX+zogaR/2, zogaY);
+                        Point desno = new Point(zogaX+zogaR, zogaY+zogaR/2);
+                        Point dol = new Point(zogaX+zogaR/2, zogaY+zogaR);
                         
                         if(kocke[i].vrniVidna()) {
-                            if (kocke[i].getRect().contains(levo)) vX *= -1;
-                            else if (kocke[i].getRect().contains(desno)) vX *= -1;
-                            else if (kocke[i].getRect().contains(gor)) vY *= -1;
-                            else if (kocke[i].getRect().contains(dol)) vY *= -1;
-                            kocke[i].unicena(kocke[i].vrniVidna());
+                            if (kocke[i].getRect().contains(levo)) {
+                                vX *= -1;
+                                stKock--;
+                                kocke[i].unicena(kocke[i].vrniVidna());                                
+                            }
+                            else if (kocke[i].getRect().contains(desno)) {
+                                vX *= -1;
+                                stKock--;
+                                kocke[i].unicena(kocke[i].vrniVidna());                                
+                            }
+                            else if (kocke[i].getRect().contains(gor)) {
+                                vY *= -1;
+                                stKock--;
+                                kocke[i].unicena(kocke[i].vrniVidna());                                
+                            }
+                            else if (kocke[i].getRect().contains(dol)) {
+                                vY *= -1;
+                                stKock--;
+                                kocke[i].unicena(kocke[i].vrniVidna());                                
+                            }
+                            if (stKock == 0) {
+                                ura = 0;
+                                zmaga = true;
+                                konec = false;
+                                igra = false;
+                                start = false;
+                            }
                         }
                     }
                 }
@@ -244,14 +280,13 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
 		super.paintComponent(g);
 		g.setColor(Color.BLACK);
 		g.setFont(new Font(Font.DIALOG, Font.BOLD, 36));
-		if (!konec) {
+		if (!konec && !zmaga) {
 			if (!start) {
                             g.drawString(String.valueOf("ENTER za zacetek"), 290, 310);
 			}
 			else {
 				g.setColor(Color.GREEN);
 				g.fillRect(ploscaX, ploscaY, ploscaSirina, ploscaVisina);
-                                //System.out.println(ploscaX+" "+ploscaY);
 				g.setColor(Color.BLACK);
 				g.fillOval(zogaX, zogaY, zogaR, zogaR);
 				g.setColor(Color.RED);
@@ -279,7 +314,12 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
 		}
 		else {
                     g.setColor(Color.BLACK);
-                    g.drawString(String.valueOf("Konec igre!"), 290, 310);
+                    if (konec) {
+                        g.drawString(String.valueOf("Konec igre!"), 290, 310);
+                    }
+                    else if (zmaga) {
+                        g.drawString(String.valueOf("Congradumalations!"), 290, 310);
+                    }
                 }
 	}
 
@@ -288,9 +328,10 @@ public class Biznis extends JPanel implements ActionListener, KeyListener{
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
        		start = true;
-       		if (konec) {
+       		if (konec || zmaga) {
        			start = false;
        			konec = false;
+                        zmaga = false;
        			zivljenja = 3;
        			igra = false;
        		}
